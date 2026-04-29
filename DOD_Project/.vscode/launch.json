@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    
+    {
+      "name": "(Debug) Run",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/Build/Debug/DOD_Project.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "(Debug) Build project"
+    },
+    {
+      "name": "(Release) Run",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/Build/Release/DOD_Project.exe",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "(Release) Build project",
+      "noDebug": true
+    }
+  ]
+}

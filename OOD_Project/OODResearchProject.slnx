@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="OODResearchProject/OODResearchProject.vcxproj" Id="dab2818c-a79f-4313-bfc0-0ea0ccb5f72c" />
+</Solution>

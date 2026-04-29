@@ -1,0 +1,9 @@
+.idea
+*.exe
+*.vcxproj.filters
+*.vcxproj.user
+OOD_Project/OODResearchProject/x64/
+OOD_Project/.vs
+OOD_Project/x64/Release/*.pdb
+OOD_Project/x64/Debug/*.pdb
+DOD_Project/Build/Debug/*.pdb

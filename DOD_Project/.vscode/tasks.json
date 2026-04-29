@@ -1,0 +1,113 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+    "label": "(Shaders) Compile all",
+    "type": "shell",
+    "command": "powershell",
+    "args": [
+      "-NoProfile",
+      "-ExecutionPolicy", "Bypass",
+      "-File", ".vscode/compile_shaders.ps1"
+    ],
+    "options": {
+      "cwd": "${workspaceFolder}"
+    },
+    "problemMatcher": []
+    },
+
+    {
+      "label": "(Debug) Build project",
+      "type": "shell",
+      "command": "odin",
+      "args": [
+        "build",
+        "./src",
+        "-collection:app=./src",
+        "-collection:libs=./libs",
+        "-collection:Dependencies=./Dependencies",
+        "-out:./Build/Debug/DOD_Project.exe",
+        "-debug",
+        "-o:none"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": { "kind": "build", "isDefault": true },
+      "dependsOn": ["(Shaders) Compile all"],
+      "problemMatcher": []
+    },
+
+    {
+      "label": "(Debug) Build project and run",
+      "type": "shell",
+      "command": "odin",
+      "args": [
+        "run",
+        "./src",
+        "-collection:app=./src",
+        "-collection:libs=./libs",
+        "-collection:Dependencies=./Dependencies",
+        "-out:./Build/Debug/DOD_Project.exe",
+        "-debug",
+        "-o:none",
+        "--"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "test",
+      "dependsOn": ["(Shaders) Compile all"],
+      "problemMatcher": []
+    },
+
+    {
+      "label": "(Release) Build project",
+      "type": "shell",
+      "command": "odin",
+      "args": [
+        "build",
+        "./src",
+        "-collection:app=./src",
+        "-collection:libs=./libs",
+        "-collection:Dependencies=./Dependencies",
+        "-out:./Build/Release/DOD_Project.exe",
+        "-o:speed"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "dependsOn": ["(Shaders) Compile all"],
+      "problemMatcher": []
+    },
+
+    {
+      "label": "(Release) Build project and run",
+      "type": "shell",
+      "command": "odin",
+      "args": [
+        "run",
+        "./src",
+        "-collection:app=./src",
+        "-collection:libs=./libs",
+        "-collection:Dependencies=./Dependencies",
+        "-out:./Build/Release/DOD_Project.exe",
+        "-o:speed",
+        "--"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "dependsOn": ["(Shaders) Compile all"],
+      "problemMatcher": []
+    }, 
+
+    {
+      "label": "(Dev) Run (super fast)",
+      "type": "process",
+      "command": "odin",
+      "args": [
+          "run", "./src",
+          "-collection:libs=./libs",
+          "-collection:Dependencies=Dependencies",
+          "-out:./Build/Debug/DOD_Project.exe",
+          "-extra-linker-flags:/LIBPATH:libs user32.lib gdi32.lib shell32.lib kernel32.lib"
+      ],
+      "options": { "cwd": "${workspaceFolder}" },
+      "dependsOn": ["(Shaders) Compile all"],
+      "problemMatcher": []
+    }
+  ]
+}
