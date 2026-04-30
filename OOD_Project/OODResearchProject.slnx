@@ -3,5 +3,6 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Project Path="Dependencies/SDL3/VisualC/SDL/SDL.vcxproj" Id="81ce8daf-ebb2-4761-8e45-b71abcca8c68" />
   <Project Path="OODResearchProject/OODResearchProject.vcxproj" Id="dab2818c-a79f-4313-bfc0-0ea0ccb5f72c" />
 </Solution>

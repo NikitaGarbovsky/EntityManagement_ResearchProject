@@ -1,7 +1,9 @@
 package main 
 
-import "core:fmt"
+import "app"
 
 main :: proc() {
-    fmt.println("Hello World")
+    app.init()
+    app.run()
+    app.shutdown()
 }
