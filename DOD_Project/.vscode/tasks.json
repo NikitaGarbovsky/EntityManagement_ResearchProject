@@ -24,8 +24,6 @@
         "build",
         "./src",
         "-collection:app=./src",
-        "-collection:libs=./libs",
-        "-collection:Dependencies=./Dependencies",
         "-out:./Build/Debug/DOD_Project.exe",
         "-debug",
         "-o:none"
@@ -44,8 +42,6 @@
         "run",
         "./src",
         "-collection:app=./src",
-        "-collection:libs=./libs",
-        "-collection:Dependencies=./Dependencies",
         "-out:./Build/Debug/DOD_Project.exe",
         "-debug",
         "-o:none",
@@ -65,8 +61,6 @@
         "build",
         "./src",
         "-collection:app=./src",
-        "-collection:libs=./libs",
-        "-collection:Dependencies=./Dependencies",
         "-out:./Build/Release/DOD_Project.exe",
         "-o:speed"
       ],
@@ -83,8 +77,6 @@
         "run",
         "./src",
         "-collection:app=./src",
-        "-collection:libs=./libs",
-        "-collection:Dependencies=./Dependencies",
         "-out:./Build/Release/DOD_Project.exe",
         "-o:speed",
         "--"
@@ -100,10 +92,8 @@
       "command": "odin",
       "args": [
           "run", "./src",
-          "-collection:libs=./libs",
-          "-collection:Dependencies=Dependencies",
           "-out:./Build/Debug/DOD_Project.exe",
-          "-extra-linker-flags:/LIBPATH:libs assimp-vc143-mtd.lib user32.lib gdi32.lib shell32.lib kernel32.lib"
+          "-extra-linker-flags:/LIBPATH:libs user32.lib gdi32.lib shell32.lib kernel32.lib"
       ],
       "options": { "cwd": "${workspaceFolder}" },
       "dependsOn": ["(Shaders) Compile all"],
