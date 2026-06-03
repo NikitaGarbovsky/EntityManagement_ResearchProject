@@ -1,9 +1,9 @@
 package main 
 
-import "app"
+import application "app"
 
 main :: proc() {
-    app.init()
-    app.run()
-    app.shutdown()
+    application.Init(&application.appState)
+    application.Run(&application.appState)
+    application.Shutdown(&application.appState)
 }

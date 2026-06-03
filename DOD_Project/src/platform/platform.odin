@@ -2,24 +2,44 @@ package platform
 import sdl "vendor:sdl3"
 import "core:fmt"
 
-init :: proc() { 
+Init :: proc(_p : ^Platform) { 
     ok := sdl.Init({.VIDEO}); assert(ok)
 
-    window = sdl.CreateWindow(
+    _p.width = 1920
+    _p.height = 1080
+
+    _p.window = sdl.CreateWindow(
         "DOD Research Project",
-        1920,
-        1080,
+        _p.width,
+        _p.height,
         nil
     )
-    assert(window != nil)
+    assert(_p.window != nil)
 
-    running = true
+    _p.gpu = sdl.CreateGPUDevice({.SPIRV}, true, nil); assert(_p.gpu != nil)
+    ok = sdl.ClaimWindowForGPUDevice(_p.gpu, _p.window); assert(ok)
+
+    ok = sdl.SetGPUSwapchainParameters(_p.gpu, _p.window, .SDR, .IMMEDIATE); assert(ok)
+
+    _p.running = true
     fmt.printfln("--- Platform & Window Initialized")
 }
 
-shutdown :: proc() {
-    if window != nil {
-        sdl.DestroyWindow(window)
+ExecuteSdlEvents :: proc(_p : ^Platform) {
+    // Process events
+    event : sdl.Event 
+    for sdl.PollEvent(&event) {
+        #partial switch event.type {
+            case .QUIT:
+                _p.running = false
+        }
+    }
+}
+
+Shutdown :: proc(_p : ^Platform) {
+    if _p.window != nil {
+        sdl.DestroyWindow(_p.window)
+        _p.window = nil
     }
     sdl.Quit()
 }
