@@ -7,7 +7,7 @@ import glm "core:math/linalg/glsl"
 Camera2D :: struct {
     position : glm.vec2, // World-space center of the camera
     zoom : f32, // 1 = default, 2 = zoom in, 0.5 = zoom out
-    viewport_size : glm.vec2, // Pixels
+    viewport_size : glm.vec2, // ixels
 }
 
 Rect2D :: struct {
@@ -27,7 +27,7 @@ Renderer :: struct {
 
     clear_color : [4]f32,
     camera : Camera2D,
-    sprite_batcher : Sprite_Batcher,
+    sprite_draw_resources : Sprite_DrawResources,
 }
 
 // Holds the shared uniform data for the batched sprites
@@ -46,8 +46,8 @@ Sprite_Instance :: struct {
     color : [4]f32,
 }
 
-// Holds data related to a batching of sprites.
-Sprite_Batcher :: struct {
+// Holds resources data for sprites send to the renderer.
+Sprite_DrawResources :: struct {
     quad_vb : ^sdl.GPUBuffer,
     quad_ib : ^sdl.GPUBuffer,
 
@@ -55,6 +55,4 @@ Sprite_Batcher :: struct {
     instance_transfer : ^sdl.GPUTransferBuffer,
 
     max_instances : u32,
-
-    instances : [dynamic]Sprite_Instance,
 }

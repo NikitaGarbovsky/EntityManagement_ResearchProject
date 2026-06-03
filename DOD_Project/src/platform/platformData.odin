@@ -15,7 +15,7 @@ Frame_Stats :: struct {
     freq : u64,
     last_counter : u64,
     accum_seconds : f64,
-    accum_halfsec : f64,
+    accumSpawnThreshhold : f64,
     frame_count : i32,
     fps : f64,
     ms_per_frame : f64,
@@ -39,12 +39,12 @@ TickFrameStats :: proc(stats : ^Frame_Stats, _count : int) -> (dt : f32, spawnTh
     dt = f32(raw_dt)
 
     stats.accum_seconds += raw_dt
-    stats.accum_halfsec += raw_dt
+    stats.accumSpawnThreshhold += raw_dt
     stats.frame_count += 1
 
-    if stats.accum_halfsec >= 0.0001 {
+    if stats.accumSpawnThreshhold >= 0.0001 {
         spawnThisFrame = true
-        stats.accum_halfsec = 0
+        stats.accumSpawnThreshhold = 0
     }
 
     if stats.accum_seconds >= 1.0 {

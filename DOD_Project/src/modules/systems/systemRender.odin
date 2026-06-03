@@ -3,15 +3,19 @@ package systems
 import "../ecs"
 import "../renderer"
 
-RenderWorld :: proc(_world : ^ecs.Entity_World, _renderer : ^renderer.Renderer) -> bool {
-    BuildSpriteInstances(_world, &_renderer.sprite_batcher.instances)
+RenderWorld :: proc(
+    _world : ^ecs.Entity_World, 
+    _renderer : ^renderer.Renderer, 
+    _out_instances : ^[dynamic]renderer.Sprite_Instance) -> bool {
+    clear(_out_instances)
+    BuildSpriteInstances(_world, _out_instances)
 
-    if len(_renderer.sprite_batcher.instances) == 0 do return true
+    if len(_out_instances) == 0 do return true
 
-    renderer.UploadInstancedata(_renderer, _renderer.sprite_batcher.instances[:])
+    renderer.UploadSpriteInstances(_renderer, _out_instances[:])
 
     if !renderer.BeginWorldPass(_renderer) do return false
-    renderer.SubmitSpriteInstances(_renderer, u32(len(_renderer.sprite_batcher.instances)))
+    renderer.DrawSpriteInstances(_renderer, u32(len(_out_instances)))
 
     return true
 }

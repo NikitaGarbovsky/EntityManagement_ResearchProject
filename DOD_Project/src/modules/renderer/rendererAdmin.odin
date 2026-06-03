@@ -14,20 +14,17 @@ Init :: proc(_renderer : ^Renderer, _platform : ^platform.Platform, _vert_code, 
     _renderer.camera.zoom = 1.0
     _renderer.camera.viewport_size = glm.vec2{1920, 1080}
 
-    if !InitSpriteBatcher(_renderer, 200000) do return false
+    if !InitSpriteRendererResources(_renderer, 200000) do return false
     if !InitSpritePipeline(_renderer, _vert_code, _frag_code) do return false
 
     return true
 }
 
 
-// Initializes all GPU resources for the sprite batcher
-InitSpriteBatcher :: proc(_renderer : ^Renderer, _max_instances : u32) -> bool {
-    batcher := &_renderer.sprite_batcher
-    batcher.max_instances = _max_instances
-
-    // Allocate all the memory upfront for the maximum amount of instances
-    batcher.instances = make([dynamic]Sprite_Instance, 0, int(_max_instances))
+// Initializes all GPU resources for the sprite renderer
+InitSpriteRendererResources :: proc(_renderer : ^Renderer, _max_instances : u32) -> bool {
+    instancer := &_renderer.sprite_draw_resources
+    instancer.max_instances = _max_instances
 
     quad_vertices := [4]Quad_Vertex{
         {local_pos = {0.0, 0.0}},
@@ -41,26 +38,26 @@ InitSpriteBatcher :: proc(_renderer : ^Renderer, _max_instances : u32) -> bool {
     quad_ib_size := u32(len(quad_indices)) * u32(size_of(u16))
     instance_buf_size  := _max_instances * u32(size_of(Sprite_Instance))
 
-    batcher.quad_vb = sdl.CreateGPUBuffer(_renderer.gpu, sdl.GPUBufferCreateInfo{usage = {.VERTEX}, size = quad_vb_size})
-    if batcher.quad_vb == nil {
+    instancer.quad_vb = sdl.CreateGPUBuffer(_renderer.gpu, sdl.GPUBufferCreateInfo{usage = {.VERTEX}, size = quad_vb_size})
+    if instancer.quad_vb == nil {
         log.errorf("CreateGPUBuffer quad_vb failed: {}", sdl.GetError())
         return false
     }
 
-    batcher.quad_ib = sdl.CreateGPUBuffer(_renderer.gpu, sdl.GPUBufferCreateInfo{usage = {.INDEX}, size = quad_ib_size})
-    if batcher.quad_ib == nil {
+    instancer.quad_ib = sdl.CreateGPUBuffer(_renderer.gpu, sdl.GPUBufferCreateInfo{usage = {.INDEX}, size = quad_ib_size})
+    if instancer.quad_ib == nil {
         log.errorf("CreateGPUBuffer quad_ib failed: {}", sdl.GetError())
         return false
     }
 
-    batcher.instance_buffer = sdl.CreateGPUBuffer(_renderer.gpu, sdl.GPUBufferCreateInfo{usage = {.VERTEX}, size = instance_buf_size})
-    if batcher.instance_buffer == nil {
+    instancer.instance_buffer = sdl.CreateGPUBuffer(_renderer.gpu, sdl.GPUBufferCreateInfo{usage = {.VERTEX}, size = instance_buf_size})
+    if instancer.instance_buffer == nil {
         log.errorf("CreateGPUBuffer instance_buffer failed: {}", sdl.GetError())
         return false
     }
 
-    batcher.instance_transfer = sdl.CreateGPUTransferBuffer(_renderer.gpu, sdl.GPUTransferBufferCreateInfo{usage = .UPLOAD, size = instance_buf_size})
-    if batcher.instance_transfer == nil {
+    instancer.instance_transfer = sdl.CreateGPUTransferBuffer(_renderer.gpu, sdl.GPUTransferBufferCreateInfo{usage = .UPLOAD, size = instance_buf_size})
+    if instancer.instance_transfer == nil {
         log.errorf("CreateGPUTransferBuffer instance_transfer failed: {}", sdl.GetError())
         return false
     }
@@ -105,11 +102,11 @@ InitSpriteBatcher :: proc(_renderer : ^Renderer, _max_instances : u32) -> bool {
     copy_pass := sdl.BeginGPUCopyPass(cmd_buf)
     sdl.UploadToGPUBuffer(copy_pass,
         sdl.GPUTransferBufferLocation{transfer_buffer = quad_vb_xfer, offset = 0},
-        sdl.GPUBufferRegion{buffer = batcher.quad_vb, offset = 0, size = quad_vb_size},
+        sdl.GPUBufferRegion{buffer = instancer.quad_vb, offset = 0, size = quad_vb_size},
         false)
     sdl.UploadToGPUBuffer(copy_pass,
         sdl.GPUTransferBufferLocation{transfer_buffer = quad_ib_xfer, offset = 0},
-        sdl.GPUBufferRegion{buffer = batcher.quad_ib, offset = 0, size = quad_ib_size},
+        sdl.GPUBufferRegion{buffer = instancer.quad_ib, offset = 0, size = quad_ib_size},
         false)
     sdl.EndGPUCopyPass(copy_pass)
 
@@ -232,17 +229,17 @@ InitSpritePipeline :: proc(_renderer : ^Renderer, _vert_code, _frag_code : []u8)
     return true
 }
 
-ShutdownSpriteBatcher :: proc(_renderer : ^Renderer) {
-    batcher := &_renderer.sprite_batcher
+ShutdownSpriteRendererResources :: proc(_renderer : ^Renderer) {
+    dr := &_renderer.sprite_draw_resources
 
-    if batcher.quad_vb != nil { sdl.ReleaseGPUBuffer(_renderer.gpu, batcher.quad_vb); batcher.quad_vb = nil }
-    if batcher.quad_ib != nil { sdl.ReleaseGPUBuffer(_renderer.gpu, batcher.quad_ib); batcher.quad_ib = nil }
-    if batcher.instance_buffer != nil { sdl.ReleaseGPUBuffer(_renderer.gpu, batcher.instance_buffer); batcher.instance_buffer = nil }
-    if batcher.instance_transfer != nil { sdl.ReleaseGPUTransferBuffer(_renderer.gpu, batcher.instance_transfer); batcher.instance_transfer = nil }
+    if dr.quad_vb != nil { sdl.ReleaseGPUBuffer(_renderer.gpu, dr.quad_vb); dr.quad_vb = nil }
+    if dr.quad_ib != nil { sdl.ReleaseGPUBuffer(_renderer.gpu, dr.quad_ib); dr.quad_ib = nil }
+    if dr.instance_buffer != nil { sdl.ReleaseGPUBuffer(_renderer.gpu, dr.instance_buffer); dr.instance_buffer = nil }
+    if dr.instance_transfer != nil { sdl.ReleaseGPUTransferBuffer(_renderer.gpu, dr.instance_transfer); dr.instance_transfer = nil }
 }
 
 Shutdown :: proc(_renderer : ^Renderer) {
-    ShutdownSpriteBatcher(_renderer)
+    ShutdownSpriteRendererResources(_renderer)
 
     if _renderer.sprite_pipeline != nil {
         sdl.ReleaseGPUGraphicsPipeline(_renderer.gpu, _renderer.sprite_pipeline)

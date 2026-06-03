@@ -65,30 +65,30 @@ EndFrame :: proc(_renderer : ^Renderer) {
     _renderer.swapchain_tex = nil
 }
 
-UploadInstancedata :: proc(_renderer : ^Renderer, _instances : []Sprite_Instance) {
+UploadSpriteInstances :: proc(_renderer : ^Renderer, _instances : []Sprite_Instance) {
     if len(_instances) == 0 do return
 
     bytes_needed := u32(len(_instances)) * size_of(Sprite_Instance)
-    assert(bytes_needed <= _renderer.sprite_batcher.max_instances * size_of(Sprite_Instance))
+    assert(bytes_needed <= _renderer.sprite_draw_resources.max_instances * size_of(Sprite_Instance))
 
-    mapped_raw := sdl.MapGPUTransferBuffer(_renderer.gpu, _renderer.sprite_batcher.instance_transfer, true)
+    mapped_raw := sdl.MapGPUTransferBuffer(_renderer.gpu, _renderer.sprite_draw_resources.instance_transfer, true)
     if mapped_raw == nil {
         log.errorf("MapGPUTransferBuffer failed: {}", sdl.GetError())
         return
     }
 
     copy(([^]Sprite_Instance)(mapped_raw)[:len(_instances)], _instances)
-    sdl.UnmapGPUTransferBuffer(_renderer.gpu, _renderer.sprite_batcher.instance_transfer)
+    sdl.UnmapGPUTransferBuffer(_renderer.gpu, _renderer.sprite_draw_resources.instance_transfer)
 
     copy_pass := sdl.BeginGPUCopyPass(_renderer.cmd_buf)
     sdl.UploadToGPUBuffer(copy_pass,
-        sdl.GPUTransferBufferLocation{transfer_buffer = _renderer.sprite_batcher.instance_transfer, offset = 0},
-        sdl.GPUBufferRegion{buffer = _renderer.sprite_batcher.instance_buffer, offset = 0, size = bytes_needed},
+        sdl.GPUTransferBufferLocation{transfer_buffer = _renderer.sprite_draw_resources.instance_transfer, offset = 0},
+        sdl.GPUBufferRegion{buffer = _renderer.sprite_draw_resources.instance_buffer, offset = 0, size = bytes_needed},
         true)
     sdl.EndGPUCopyPass(copy_pass)
 }
 
-SubmitSpriteInstances :: proc(_renderer : ^Renderer, instance_count : u32) {
+DrawSpriteInstances :: proc(_renderer : ^Renderer, instance_count : u32) {
     if _renderer.render_pass == nil || _renderer.sprite_pipeline == nil || instance_count == 0 do return
 
     global_vs := Sprite_Global_VS_Uniform{view_proj = CameraViewProjMatrix(&_renderer.camera)}
@@ -97,13 +97,13 @@ SubmitSpriteInstances :: proc(_renderer : ^Renderer, instance_count : u32) {
     sdl.BindGPUGraphicsPipeline(_renderer.render_pass, _renderer.sprite_pipeline)
 
     vb_bindings := [2]sdl.GPUBufferBinding{
-        {buffer = _renderer.sprite_batcher.quad_vb, offset = 0},
-        {buffer = _renderer.sprite_batcher.instance_buffer, offset = 0},
+        {buffer = _renderer.sprite_draw_resources.quad_vb, offset = 0},
+        {buffer = _renderer.sprite_draw_resources.instance_buffer, offset = 0},
     }
     sdl.BindGPUVertexBuffers(_renderer.render_pass, 0, &vb_bindings[0], 2)
     sdl.BindGPUIndexBuffer(
         _renderer.render_pass,
-        sdl.GPUBufferBinding{buffer = _renderer.sprite_batcher.quad_ib, offset = 0},
+        sdl.GPUBufferBinding{buffer = _renderer.sprite_draw_resources.quad_ib, offset = 0},
         ._16BIT,
     )
 

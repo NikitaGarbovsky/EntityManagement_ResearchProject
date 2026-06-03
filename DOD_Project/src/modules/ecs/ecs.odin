@@ -4,7 +4,6 @@ import components "../components"
 
 Init :: proc(_world : ^Entity_World) {
     _world.next_entity = 0
-    _world.free_entities = make([dynamic]Entity, 0, 1024)
 
     _world.transforms.index_of = make(map[Entity]int)
     _world.sprites.index_of = make(map[Entity]int)
@@ -12,13 +11,6 @@ Init :: proc(_world : ^Entity_World) {
 }
 
 CreateEntity :: proc(_world : ^Entity_World) -> Entity {
-    if len(_world.free_entities) > 0 {
-        idx := len(_world.free_entities) - 1
-        e := _world.free_entities[idx]
-        pop(&_world.free_entities)
-        return e
-    }
-
     e := Entity{id = _world.next_entity}
     _world.next_entity += 1
     return e
@@ -28,8 +20,6 @@ DeleteEntity :: proc(_world : ^Entity_World, _entityToDelete : Entity) {
     RemoveComponent(&_world.transforms, _entityToDelete)
     RemoveComponent(&_world.sprites, _entityToDelete)
     RemoveComponent(&_world.velocities, _entityToDelete)
-
-    append(&_world.free_entities, _entityToDelete)
 }
 
 @private 
@@ -45,7 +35,7 @@ AddComponent :: proc(_compStore : ^Component_Store($T), _entity : Entity, _value
     _compStore.index_of[_entity] = idx
 }
 
-AddComponentToEntityWorld :: proc(_world : ^Entity_World, _compStore : ^Component_Store($T), _entity : Entity, _value : T, _flag : components.Component_Flag) {
+AddComponentToEntityWorld :: proc(_world : ^Entity_World, _compStore : ^Component_Store($T), _entity : Entity, _value : T) {
     AddComponent(_compStore, _entity, _value)
 }
 
@@ -69,7 +59,7 @@ RemoveComponent :: proc(_compStore : ^Component_Store($T), _entity : Entity) {
     delete_key(&_compStore.index_of, _entity)
 }
 
-RemoveComponentFromEntityWorld :: proc(_world : ^Entity_World, _compStore : ^Component_Store($T), _entity : Entity, _flag : components.Component_Flag) {
+RemoveComponentFromEntityWorld :: proc(_world : ^Entity_World, _compStore : ^Component_Store($T), _entity : Entity) {
     RemoveComponent(_compStore, _entity)
 }
 

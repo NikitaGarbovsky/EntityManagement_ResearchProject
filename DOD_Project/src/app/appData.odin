@@ -1,6 +1,6 @@
 package application
 
-import "../modules/renderer"
+import renderermodule "../modules/renderer"
 import sdl3platform "../platform"
 import "../modules/ecs"
 
@@ -8,8 +8,9 @@ import "../modules/ecs"
 AppState :: struct {
 	platform : sdl3platform.Platform,
 	world : ecs.Entity_World,
-	renderer : renderer.Renderer, 
+	renderer : renderermodule.Renderer, 
 	stats : sdl3platform.Frame_Stats,
+	render_instances : [dynamic]renderermodule.Sprite_Instance,
 }
 appState : AppState
 

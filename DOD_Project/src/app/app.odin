@@ -7,14 +7,18 @@ import sdl "vendor:sdl3"
 import "../platform"
 import "../modules/renderer"
 import "../modules/systems"
+import "../modules/ecs"
 
 shader_frag_batch := #load("../../Resources/Shaders/sprite_batch.frag.spv")
 shader_vert_batch := #load("../../Resources/Shaders/sprite_batch.vert.spv")
 
 // Initializes the application
 Init :: proc(_app : ^AppState) {
+    _app.render_instances = make([dynamic]renderer.Sprite_Instance, 0, 200000)
+
     platform.Init(&_app.platform)
     renderer.Init(&_app.renderer, &_app.platform, shader_vert_batch, shader_frag_batch)
+    ecs.Init(&_app.world)
     platform.InitFrameStats(&_app.stats)
 
     _app.renderer.camera.position = {960, 540}
@@ -44,13 +48,14 @@ Run :: proc(_app : ^AppState) {
         render_sim_start := sdl.GetPerformanceCounter()
         if renderer.BeginFrame(&_app.renderer, viewport_size) {
             defer renderer.EndFrame(&_app.renderer)
-            _ = systems.RenderWorld(&_app.world, &_app.renderer)
+            _ = systems.RenderWorld(&_app.world, &_app.renderer, &_app.render_instances)
         }
         _app.stats.render_ms = f64(sdl.GetPerformanceCounter() - render_sim_start) * 1000.0 / f64(_app.stats.freq)
     }
 }
 
 Shutdown :: proc(_app : ^AppState) {
+    renderer.Shutdown(&_app.renderer)
     platform.Shutdown(&_app.platform)
     fmt.println("Shutdown Successfully")
 }
