@@ -2,7 +2,7 @@
 
 namespace application {
     
-    void init();
-    void shutdown();
-    void run();
+    void init(struct AppState* _appState);
+    void run(struct AppState* _appState);
+    void shutdown(struct AppState* _appState);
 }

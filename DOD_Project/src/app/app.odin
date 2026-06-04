@@ -23,10 +23,13 @@ Init :: proc(_app : ^AppState) {
 
     _app.renderer.camera.position = {960, 540}
     _app.renderer.camera.zoom = 1
+
+    fmt.printfln("--- App Successfully Initialized")
 }
 
 // Runs the main loop of the application
 Run :: proc(_app : ^AppState) {
+    fmt.printfln("--- Running Simlutation")
     for _app.platform.running {
         platform.ExecuteSdlEvents(&_app.platform)
 

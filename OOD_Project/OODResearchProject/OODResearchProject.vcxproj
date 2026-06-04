@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\app\appData.cpp" />
     <ClCompile Include="src\app\app.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\modules\renderer\renderer.cpp" />
@@ -140,6 +141,7 @@
     <ClCompile Include="src\platform\platform_data.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\app\appData.h" />
     <ClInclude Include="src\app\app.h" />
     <ClInclude Include="src\modules\renderer\renderer.h" />
     <ClInclude Include="src\platform\platform.h" />

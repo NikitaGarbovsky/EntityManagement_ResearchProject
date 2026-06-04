@@ -1,6 +1,6 @@
 ﻿#include "platform_data.h"
 
-namespace platform {
-    SDL_Window* window = nullptr;
-    bool running = false;
+namespace sdl3platform {
+    
+    Platform gPlatform;
 }
