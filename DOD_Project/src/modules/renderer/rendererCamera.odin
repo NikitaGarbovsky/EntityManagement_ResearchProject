@@ -2,6 +2,10 @@ package renderer
 
 import glm "core:math/linalg/glsl"
 
+/// 
+/// Helpers for getting data from the 2D Orthographic camera 
+/// 
+
 CameraSetZoom :: proc(_cam : ^Camera2D, _zoom : f32) {
     _cam.zoom = max(0.05, _zoom)
 }

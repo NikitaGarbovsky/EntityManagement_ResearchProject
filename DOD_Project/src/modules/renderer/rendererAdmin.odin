@@ -5,6 +5,12 @@ import "core:log"
 import glm "core:math/linalg/glsl"
 import "../../platform"
 
+///
+/// Contains the init, shutdown & configuration logic for the SDL3 GPU renderer. 
+///
+
+
+// Initialized the renderer
 Init :: proc(_renderer : ^Renderer, _platform : ^platform.Platform, _vert_code, _frag_code : []u8) -> bool {
     _renderer.gpu = _platform.gpu
     _renderer.window = _platform.window
@@ -14,18 +20,19 @@ Init :: proc(_renderer : ^Renderer, _platform : ^platform.Platform, _vert_code, 
     _renderer.camera.zoom = 1.0
     _renderer.camera.viewport_size = glm.vec2{1920, 1080}
 
+    // Max of 200000 Sprites. 
     if !InitSpriteRendererResources(_renderer, 200000) do return false
     if !InitSpritePipeline(_renderer, _vert_code, _frag_code) do return false
 
     return true
 }
 
-
 // Initializes all GPU resources for the sprite renderer
 InitSpriteRendererResources :: proc(_renderer : ^Renderer, _max_instances : u32) -> bool {
     instancer := &_renderer.sprite_draw_resources
     instancer.max_instances = _max_instances
 
+    // Manually setup the vertex and indices of quad sprite
     quad_vertices := [4]Quad_Vertex{
         {local_pos = {0.0, 0.0}},
         {local_pos = {1.0, 0.0}},
@@ -38,6 +45,7 @@ InitSpriteRendererResources :: proc(_renderer : ^Renderer, _max_instances : u32)
     quad_ib_size := u32(len(quad_indices)) * u32(size_of(u16))
     instance_buf_size  := _max_instances * u32(size_of(Sprite_Instance))
 
+    // Create the gpu buffers that will hold that data
     instancer.quad_vb = sdl.CreateGPUBuffer(_renderer.gpu, sdl.GPUBufferCreateInfo{usage = {.VERTEX}, size = quad_vb_size})
     if instancer.quad_vb == nil {
         log.errorf("CreateGPUBuffer quad_vb failed: {}", sdl.GetError())
@@ -56,20 +64,22 @@ InitSpriteRendererResources :: proc(_renderer : ^Renderer, _max_instances : u32)
         return false
     }
 
+    // Only going to be regularly transferring per-sprite instance data using this.
     instancer.instance_transfer = sdl.CreateGPUTransferBuffer(_renderer.gpu, sdl.GPUTransferBufferCreateInfo{usage = .UPLOAD, size = instance_buf_size})
     if instancer.instance_transfer == nil {
         log.errorf("CreateGPUTransferBuffer instance_transfer failed: {}", sdl.GetError())
         return false
     }
 
-    // One-time upload of the shared quad geometry
+    // Prep transfer buffers for the one-time upload
+    // Vertecies
     quad_vb_xfer := sdl.CreateGPUTransferBuffer(_renderer.gpu, sdl.GPUTransferBufferCreateInfo{usage = .UPLOAD, size = quad_vb_size})
     if quad_vb_xfer == nil {
         log.errorf("CreateGPUTransferBuffer quad_vb_xfer failed: {}", sdl.GetError())
         return false
     }
     defer sdl.ReleaseGPUTransferBuffer(_renderer.gpu, quad_vb_xfer)
-
+    // Indecies
     quad_ib_xfer := sdl.CreateGPUTransferBuffer(_renderer.gpu, sdl.GPUTransferBufferCreateInfo{usage = .UPLOAD, size = quad_ib_size})
     if quad_ib_xfer == nil {
         log.errorf("CreateGPUTransferBuffer quad_ib_xfer failed: {}", sdl.GetError())
@@ -77,28 +87,30 @@ InitSpriteRendererResources :: proc(_renderer : ^Renderer, _max_instances : u32)
     }
     defer sdl.ReleaseGPUTransferBuffer(_renderer.gpu, quad_ib_xfer)
 
-    mapped_vb := ([^]Quad_Vertex)(sdl.MapGPUTransferBuffer(_renderer.gpu, quad_vb_xfer, false))
-    if mapped_vb == nil {
+    // Get buffer memloc and copy data over pre upload 
+    vertex_tbuf_ptr := ([^]Quad_Vertex)(sdl.MapGPUTransferBuffer(_renderer.gpu, quad_vb_xfer, false))
+    if vertex_tbuf_ptr == nil {
         log.errorf("MapGPUTransferBuffer quad_vb_xfer failed: {}", sdl.GetError())
         return false
     }
-    copy(mapped_vb[:len(quad_vertices)], quad_vertices[:])
+    copy(vertex_tbuf_ptr[:len(quad_vertices)], quad_vertices[:]) // copy over vertices
     sdl.UnmapGPUTransferBuffer(_renderer.gpu, quad_vb_xfer)
-
-    mapped_ib := ([^]u16)(sdl.MapGPUTransferBuffer(_renderer.gpu, quad_ib_xfer, false))
-    if mapped_ib == nil {
+    indices_tbuf_ptr := ([^]u16)(sdl.MapGPUTransferBuffer(_renderer.gpu, quad_ib_xfer, false))
+    if indices_tbuf_ptr == nil {
         log.errorf("MapGPUTransferBuffer quad_ib_xfer failed: {}", sdl.GetError())
         return false
     }
-    copy(mapped_ib[:len(quad_indices)], quad_indices[:])
+    copy(indices_tbuf_ptr[:len(quad_indices)], quad_indices[:]) // copy over indices
     sdl.UnmapGPUTransferBuffer(_renderer.gpu, quad_ib_xfer)
 
+    // Acquire the cmd buffer for upload
     cmd_buf := sdl.AcquireGPUCommandBuffer(_renderer.gpu)
     if cmd_buf == nil {
         log.errorf("AcquireGPUCommandBuffer (batcher init) failed: {}", sdl.GetError())
         return false
     }
 
+    // Upload all the data once
     copy_pass := sdl.BeginGPUCopyPass(cmd_buf)
     sdl.UploadToGPUBuffer(copy_pass,
         sdl.GPUTransferBufferLocation{transfer_buffer = quad_vb_xfer, offset = 0},
@@ -118,6 +130,7 @@ InitSpriteRendererResources :: proc(_renderer : ^Renderer, _max_instances : u32)
     return true
 }
 
+/// Initializes the sprite GpuGraphicsPipeline with the pre-compiled shaders for the renderer.
 InitSpritePipeline :: proc(_renderer : ^Renderer, _vert_code, _frag_code : []u8) -> bool {
     vert_shader := sdl.CreateGPUShader(_renderer.gpu, sdl.GPUShaderCreateInfo{
         code_size = len(_vert_code),

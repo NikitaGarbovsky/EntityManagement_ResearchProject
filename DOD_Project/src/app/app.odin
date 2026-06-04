@@ -36,6 +36,13 @@ Run :: proc(_app : ^AppState) {
         if spawn { // Spawn it
             systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
         }
+        systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
+        systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
+        systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
+        systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
+        systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
+        systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
+        systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
 
         // Run and record performance of the movement simulation
         sim_start := sdl.GetPerformanceCounter()
@@ -47,8 +54,8 @@ Run :: proc(_app : ^AppState) {
         // Render and record performance of the render frame
         render_sim_start := sdl.GetPerformanceCounter()
         if renderer.BeginFrame(&_app.renderer, viewport_size) {
-            defer renderer.EndFrame(&_app.renderer)
             _ = systems.RenderWorld(&_app.world, &_app.renderer, &_app.render_instances)
+            renderer.EndFrame(&_app.renderer)
         }
         _app.stats.render_ms = f64(sdl.GetPerformanceCounter() - render_sim_start) * 1000.0 / f64(_app.stats.freq)
     }

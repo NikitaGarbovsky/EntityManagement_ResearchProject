@@ -5,21 +5,35 @@ import "../components"
 import "core:math/rand"
 
 SimulateMovement :: proc(_world : ^ecs.Entity_World, _dt : f32, _viewport_w, _viewport_h : f32, _velocitySpeed : f32) {
-    for i := len(_world.transforms.entities) - 1; i >= 0; i -= 1 {
-        e := _world.transforms.entities[i]
-
-        vel, ok := ecs.GetComponent(&_world.velocities, e)
-        if !ok do continue
-
-        _world.transforms.data[i].pos.x += vel.linear.x * _dt
-        _world.transforms.data[i].pos.y += vel.linear.y * _dt
+    for i := len(_world.transforms.data) - 1; i >= 0; i -= 1 {
+        _world.transforms.data[i].pos.x += _world.velocities.data[i].linear.x * _dt
+        _world.transforms.data[i].pos.y += _world.velocities.data[i].linear.y * _dt
 
         if _world.transforms.data[i].pos.y > _viewport_h + 20 {
+            e := _world.transforms.entities[i]
             ecs.DeleteEntity(_world, e)
             SpawnEntity(_world, _viewport_w, _velocitySpeed)
         }
     }
 }
+
+// Different(safer) access used, lower performance. 
+// SimulateMovement :: proc(_world : ^ecs.Entity_World, _dt : f32, _viewport_w, _viewport_h : f32, _velocitySpeed : f32) {
+//     for i := len(_world.transforms.entities) - 1; i >= 0; i -= 1 {
+//         e := _world.transforms.entities[i]
+
+//         vel, ok := ecs.GetComponent(&_world.velocities, e)
+//         if !ok do continue
+
+//         _world.transforms.data[i].pos.x += vel.linear.x * _dt
+//         _world.transforms.data[i].pos.y += vel.linear.y * _dt
+
+//         if _world.transforms.data[i].pos.y > _viewport_h + 20 {
+//             ecs.DeleteEntity(_world, e)
+//             SpawnEntity(_world, _viewport_w, _velocitySpeed)
+//         }
+//     }
+// }
 
 SpawnEntity :: proc(_world : ^ecs.Entity_World, _viewport_w : f32, _velocitySpeed : f32) {
     e := ecs.CreateEntity(_world)
