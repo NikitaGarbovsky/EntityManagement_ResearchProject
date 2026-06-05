@@ -7,38 +7,65 @@
 #include "../platform/platform_data.h"
 #include "../platform/platform.h"
 
+#include "../modules/renderer/rendererAdmin.h"
+#include "../modules/renderer/rendererPipeline.h"
+#include "../modules/systems/renderScene.h"
 
 
 namespace application {
     
-    void init(AppState* _appState) {
+    void Init(AppState* _appState) {
         sdl3platform::init(&_appState->platform);
 
-        // Load precompiled shader files
-        ReadShaderFile("../Resources/Shaders/sprite_batch.frag.spv");
-        ReadShaderFile("../Resources/Shaders/sprite_batch.vert.spv");
+        auto fragShaderStr = ReadShaderFile("../Resources/Shaders/sprite_batch.frag.spv");
+        auto vertShaderStr = ReadShaderFile("../Resources/Shaders/sprite_batch.vert.spv");
 
-        // renderer init
-        // scene.init
-        // sdl3platform::initframestats
+        renderer::Init(&_appState->renderer, &_appState->platform, vertShaderStr, fragShaderStr);
+        _appState->scene.Init();
+        sdl3platform::InitFrameStats(&_appState->stats);
 
-        // set renderer camera & zoom here
+        _appState->renderer.camera.position = { 960, 540 };
+        _appState->renderer.camera.zoom = 1.0f;
 
-	    
+        _appState->scene.SpawnBatch(10000, static_cast<float>(_appState->platform.width), 5.0f);
 
         std::cout << "--- App Successfully Initialized\n";
     }
     
-    void run(AppState* _appState){
-        std::cout << "--- Running Simlutation";
+    void Run(AppState* _app) {
+        std::cout << "--- Running Simulation\n";
+        while (_app->platform.running) {
+            sdl3platform::ExecuteSdlEvents(&_app->platform);
 
-        while (_appState->platform.running) {
-            sdl3platform::ExecuteSdlEvents(&_appState->platform);
+            // Check the batch of GameObjects should be spawned this loop,
+            bool spawn = false;
+            const size_t entityCount = _app->scene.GetObjectCount();
+            const float dt = sdl3platform::TickFrameStats(&_app->stats, entityCount, spawn);
+
+            if (spawn) { // Spawn em
+                for (int i = 0; i < 1000; i++) {
+                    _app->scene.SpawnRandomSprite(static_cast<float>(_app->platform.width), 5.0f);
+                }
+            }
+
+            std::array<int, 2> viewportsize = { _app->platform.width, _app->platform.height };
+
+            size_t sim_start = SDL_GetPerformanceCounter();
+            _app->scene.Update(dt, viewportsize[0], viewportsize[1], 5.0f);
+            _app->stats.sim_time_ms = (SDL_GetPerformanceCounter() - sim_start) * 1000.0 / (_app->stats.freq);
+            
+            size_t render_sim_start = SDL_GetPerformanceCounter();
+            if (renderer::BeginFrame(&_app->renderer, viewportsize)) {
+                systems::RenderScene(_app->scene, _app->renderer, _app->render_instances);
+                renderer::EndFrame(&_app->renderer);
+            }
+            _app->stats.render_ms = (SDL_GetPerformanceCounter() - render_sim_start) * 1000.0 / (_app->stats.freq);
         }
-        
     }
     
-    void shutdown(AppState* _appState) {
+    void Shutdown(AppState* _appState) {
+        _appState->scene.Clear();
+        renderer::Shutdown(&_appState->renderer);
         sdl3platform::shutdown(&_appState->platform);
         std::cout << "Shutdown Successfully\n";
     }

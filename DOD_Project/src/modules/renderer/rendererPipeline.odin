@@ -5,6 +5,7 @@ import "core:log"
 import math "core:math/linalg"
 import glm "core:math/linalg/glsl"
 import "core:mem"
+import "core:fmt"
 
 /// SDL3 GPU Renderer Pipeline:
 ///
@@ -83,6 +84,7 @@ UploadSpriteInstances :: proc(_renderer : ^Renderer, _instances : []Sprite_Insta
     if len(_instances) == 0 do return
 
     bytes_needed := u32(len(_instances)) * size_of(Sprite_Instance)
+    //fmt.printfln("%v",bytes_needed)
     assert(bytes_needed <= _renderer.sprite_draw_resources.max_instances * size_of(Sprite_Instance))
 
     // Grant access to cpu to send data

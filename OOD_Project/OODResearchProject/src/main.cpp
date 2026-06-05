@@ -4,7 +4,7 @@
 using namespace application;
 
 int main() {
-    application::init(&gAppState);
-    application::run(&gAppState);
-    application::shutdown(&gAppState);
+    application::Init(&gAppState);
+    application::Run(&gAppState);
+    application::Shutdown(&gAppState);
 }

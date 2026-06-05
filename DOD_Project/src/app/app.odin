@@ -37,20 +37,15 @@ Run :: proc(_app : ^AppState) {
         entityCount := len(_app.world.transforms.data)
         dt, spawn := platform.TickFrameStats(&_app.stats, entityCount)
         if spawn { // Spawn it
-            systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
+            for i := 0; i < 1000; i += 1 {
+                systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
+            }
         }
-        systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
-        systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
-        systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
-        systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
-        systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
-        systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
-        systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
 
         // Run and record performance of the movement simulation
         sim_start := sdl.GetPerformanceCounter()
         systems.SimulateMovement(&_app.world, dt, f32(_app.platform.width), f32(_app.platform.height), 5)
-        _app.stats.sim_time_ms = f64(sdl.GetPerformanceCounter() - sim_start) * 1000.0 / f64(_app.stats.freq)
+        _app.stats.sim_ms_sample  = f64(sdl.GetPerformanceCounter() - sim_start) * 1000.0 / f64(_app.stats.freq)
 
         viewport_size := math.Vector2f32{f32(_app.platform.width), f32(_app.platform.height)}
 
@@ -60,7 +55,7 @@ Run :: proc(_app : ^AppState) {
             _ = systems.RenderWorld(&_app.world, &_app.renderer, &_app.render_instances)
             renderer.EndFrame(&_app.renderer)
         }
-        _app.stats.render_ms = f64(sdl.GetPerformanceCounter() - render_sim_start) * 1000.0 / f64(_app.stats.freq)
+        _app.stats.render_ms_sample  = f64(sdl.GetPerformanceCounter() - render_sim_start) * 1000.0 / f64(_app.stats.freq)
     }
 }
 
