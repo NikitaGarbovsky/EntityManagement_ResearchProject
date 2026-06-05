@@ -52,14 +52,22 @@ namespace application {
 
             size_t sim_start = SDL_GetPerformanceCounter();
             _app->scene.Update(dt, viewportsize[0], viewportsize[1], 5.0f);
-            _app->stats.sim_time_ms = (SDL_GetPerformanceCounter() - sim_start) * 1000.0 / (_app->stats.freq);
+            _app->stats.avg_sim_ms = (SDL_GetPerformanceCounter() - sim_start) * 1000.0 / (_app->stats.freq);
             
+            double build_ms = 0.0;
+            double upload_ms = 0.0;
+            double draw_ms = 0.0;
+
             size_t render_sim_start = SDL_GetPerformanceCounter();
             if (renderer::BeginFrame(&_app->renderer, viewportsize)) {
-                systems::RenderScene(_app->scene, _app->renderer, _app->render_instances);
+                systems::RenderScene(_app->scene, _app->renderer, _app->render_instances, build_ms, upload_ms, draw_ms);
                 renderer::EndFrame(&_app->renderer);
             }
-            _app->stats.render_ms = (SDL_GetPerformanceCounter() - render_sim_start) * 1000.0 / (_app->stats.freq);
+            _app->stats.avg_render_ms = (SDL_GetPerformanceCounter() - render_sim_start) * 1000.0 / (_app->stats.freq);
+
+            _app->stats.build_instances_ms = build_ms;
+            _app->stats.upload_ms = upload_ms;
+            _app->stats.draw_ms = draw_ms;
         }
     }
     

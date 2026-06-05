@@ -33,9 +33,10 @@ Run :: proc(_app : ^AppState) {
     for _app.platform.running {
         platform.ExecuteSdlEvents(&_app.platform)
 
+        spawn : bool = false
         // Check if a entity should be spawned this loop,
         entityCount := len(_app.world.transforms.data)
-        dt, spawn := platform.TickFrameStats(&_app.stats, entityCount)
+        dt := platform.TickFrameStats(&_app.stats, entityCount, &spawn)
         if spawn { // Spawn it
             for i := 0; i < 1000; i += 1 {
                 systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
@@ -45,17 +46,28 @@ Run :: proc(_app : ^AppState) {
         // Run and record performance of the movement simulation
         sim_start := sdl.GetPerformanceCounter()
         systems.SimulateMovement(&_app.world, dt, f32(_app.platform.width), f32(_app.platform.height), 5)
-        _app.stats.sim_ms_sample  = f64(sdl.GetPerformanceCounter() - sim_start) * 1000.0 / f64(_app.stats.freq)
+        _app.stats.avg_sim_ms = f64(sdl.GetPerformanceCounter() - sim_start) * 1000.0 / f64(_app.stats.freq)
 
         viewport_size := math.Vector2f32{f32(_app.platform.width), f32(_app.platform.height)}
 
-        // Render and record performance of the render frame
-        render_sim_start := sdl.GetPerformanceCounter()
+        _app.stats.build_instances_ms = 0
+        _app.stats.upload_ms = 0
+        _app.stats.draw_ms = 0
+
+        render_start := sdl.GetPerformanceCounter()
         if renderer.BeginFrame(&_app.renderer, viewport_size) {
-            _ = systems.RenderWorld(&_app.world, &_app.renderer, &_app.render_instances)
+            _ = systems.RenderWorld(
+                &_app.world,
+                &_app.renderer,
+                &_app.render_instances,
+                _app.stats.freq,
+                &_app.stats.build_instances_ms,
+                &_app.stats.upload_ms,
+                &_app.stats.draw_ms,
+            )
             renderer.EndFrame(&_app.renderer)
         }
-        _app.stats.render_ms_sample  = f64(sdl.GetPerformanceCounter() - render_sim_start) * 1000.0 / f64(_app.stats.freq)
+        _app.stats.avg_render_ms = f64(sdl.GetPerformanceCounter() - render_start) * 1000.0 / f64(_app.stats.freq)
     }
 }
 

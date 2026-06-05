@@ -10,12 +10,25 @@ namespace sdl3platform {
     void InitFrameStats(FrameStats* _stats) {
         _stats->freq = SDL_GetPerformanceFrequency();
         _stats->last_counter = SDL_GetPerformanceCounter();
+
         _stats->accum_seconds = 0.0;
         _stats->frame_count = 0;
+
         _stats->fps = 0.0;
-        _stats->ms_per_frame = 0.0;
-        _stats->sim_time_ms = 0.0;
-        _stats->render_ms = 0.0;
+        _stats->avg_frame_ms = 0.0;
+
+        _stats->avg_sim_ms = 0.0;
+        _stats->avg_render_ms = 0.0;
+        _stats->build_instances_ms = 0.0;
+        _stats->upload_ms = 0.0;
+        _stats->draw_ms = 0.0;
+
+        _stats->accum_frame_ms = 0.0;
+        _stats->accum_sim_ms = 0.0;
+        _stats->accum_render_ms = 0.0;
+        _stats->accum_build_instances_ms = 0.0;
+        _stats->accum_upload_ms = 0.0;
+        _stats->accum_draw_ms = 0.0;
     }
 
     float TickFrameStats(FrameStats* _stats, int _count, bool& _spawnThisFrame) {
@@ -30,26 +43,45 @@ namespace sdl3platform {
         _stats->accum_seconds += raw_dt;
         _stats->frame_count += 1;
 
-        _spawnThisFrame = false;
+        _stats->accum_frame_ms += raw_dt * 1000.0;
+        _stats->accum_sim_ms += _stats->avg_sim_ms;
+        _stats->accum_render_ms += _stats->avg_render_ms;
+        _stats->accum_build_instances_ms += _stats->build_instances_ms;
+        _stats->accum_upload_ms += _stats->upload_ms;
+        _stats->accum_draw_ms += _stats->draw_ms;
 
+        _spawnThisFrame = false;
 
         if (_stats->accum_seconds >= 1.0) {
             _stats->fps = static_cast<double>(_stats->frame_count) / _stats->accum_seconds;
-            _stats->ms_per_frame = 1000.0 / _stats->fps;
+            _stats->avg_frame_ms = _stats->accum_frame_ms / static_cast<double>(_stats->frame_count);
+            _stats->avg_sim_ms = _stats->accum_sim_ms / static_cast<double>(_stats->frame_count);
+            _stats->avg_render_ms = _stats->accum_render_ms / static_cast<double>(_stats->frame_count);
+            _stats->build_instances_ms = _stats->accum_build_instances_ms / static_cast<double>(_stats->frame_count);
+            _stats->upload_ms = _stats->accum_upload_ms / static_cast<double>(_stats->frame_count);
+            _stats->draw_ms = _stats->accum_draw_ms / static_cast<double>(_stats->frame_count);
 
             std::cout << std::fixed << std::setprecision(1)
                 << "FPS: " << _stats->fps
-                << "  Total Frame MS: "
-                << std::setprecision(2) << _stats->ms_per_frame
-                << "  Sim MS: "
-                << std::setprecision(3) << _stats->sim_time_ms
-                << ", Render MS: "
-                << _stats->render_ms << '\n';
+                << "  Total Frame MS: " << std::setprecision(2) << _stats->avg_frame_ms
+                << "  Sim MS: " << std::setprecision(3) << _stats->avg_sim_ms
+                << ", Render MS: " << _stats->avg_render_ms
+                << ", Build MS: " << _stats->build_instances_ms
+                << ", Upload MS: " << _stats->upload_ms
+                << ", Draw MS: " << _stats->draw_ms << '\n';
 
             std::cout << "EntityCount: " << _count << '\n';
+
             _spawnThisFrame = true;
             _stats->accum_seconds = 0.0;
             _stats->frame_count = 0;
+
+            _stats->accum_frame_ms = 0.0;
+            _stats->accum_sim_ms = 0.0;
+            _stats->accum_render_ms = 0.0;
+            _stats->accum_build_instances_ms = 0.0;
+            _stats->accum_upload_ms = 0.0;
+            _stats->accum_draw_ms = 0.0;
         }
 
         return dt;

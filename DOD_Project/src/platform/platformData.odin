@@ -25,15 +25,16 @@ Frame_Stats :: struct {
     avg_sim_ms : f64,
     avg_render_ms : f64,
 
-    // Current frame samples
-    frame_ms_sample : f64,
-    sim_ms_sample : f64,
-    render_ms_sample : f64,
+    build_instances_ms : f64,
+    upload_ms : f64,
+    draw_ms : f64,
 
-    // Accumulators for averaging
     accum_frame_ms : f64,
     accum_sim_ms : f64,
     accum_render_ms : f64,
+    accum_build_instances_ms : f64,
+    accum_upload_ms : f64,
+    accum_draw_ms : f64,
 }
 
 InitFrameStats :: proc(stats : ^Frame_Stats) {
@@ -43,42 +44,59 @@ InitFrameStats :: proc(stats : ^Frame_Stats) {
 
 // Returns the delta time in seconds since the last call.
 // Prints FPS + per-frame timings once per second.
-TickFrameStats :: proc(_stats: ^Frame_Stats, _count: int) -> (dt: f32, spawnThisFrame: bool) {
+TickFrameStats :: proc(_stats: ^Frame_Stats, _count: int, _spawnThisFrame: ^bool) -> f32 {
     now := sdl.GetPerformanceCounter()
     delta_counts := now - _stats.last_counter
     _stats.last_counter = now
 
     raw_dt := f64(delta_counts) / f64(_stats.freq)
-    dt = f32(raw_dt)
+    dt := f32(raw_dt)
 
     _stats.accum_seconds += raw_dt
     _stats.frame_count += 1
 
-    // Accumulate timing data for averaging
     _stats.accum_frame_ms += raw_dt * 1000.0
-    _stats.accum_sim_ms += _stats.sim_ms_sample
-    _stats.accum_render_ms += _stats.render_ms_sample
+    _stats.accum_sim_ms += _stats.avg_sim_ms
+    _stats.accum_render_ms += _stats.avg_render_ms
+    _stats.accum_build_instances_ms += _stats.build_instances_ms
+    _stats.accum_upload_ms += _stats.upload_ms
+    _stats.accum_draw_ms += _stats.draw_ms
+
+    _spawnThisFrame^ = false
 
     if _stats.accum_seconds >= 1.0 {
-        spawnThisFrame = true
-
         _stats.fps = f64(_stats.frame_count) / _stats.accum_seconds
-        avg_frame_ms := _stats.accum_frame_ms / f64(_stats.frame_count)
-        avg_sim_ms := _stats.accum_sim_ms / f64(_stats.frame_count)
-        avg_render_ms := _stats.accum_render_ms / f64(_stats.frame_count)
+        _stats.avg_frame_ms = _stats.accum_frame_ms / f64(_stats.frame_count)
+        _stats.avg_sim_ms = _stats.accum_sim_ms / f64(_stats.frame_count)
+        _stats.avg_render_ms = _stats.accum_render_ms / f64(_stats.frame_count)
+        _stats.build_instances_ms = _stats.accum_build_instances_ms / f64(_stats.frame_count)
+        _stats.upload_ms = _stats.accum_upload_ms / f64(_stats.frame_count)
+        _stats.draw_ms = _stats.accum_draw_ms / f64(_stats.frame_count)
 
         fmt.printfln(
-            "FPS: %.1f  Total Frame MS: %.2f  Sim MS: %.3f, Render MS: %.3f",
-            _stats.fps, avg_frame_ms, avg_sim_ms, avg_render_ms,
+            "FPS: %.1f  Total Frame MS: %.2f  Sim MS: %.3f, Render MS: %.3f, Build MS: %.3f, Upload MS: %.3f, Draw MS: %.3f",
+            _stats.fps,
+            _stats.avg_frame_ms,
+            _stats.avg_sim_ms,
+            _stats.avg_render_ms,
+            _stats.build_instances_ms,
+            _stats.upload_ms,
+            _stats.draw_ms,
         )
+
         fmt.printfln("EntityCount: %d", _count)
 
+        _spawnThisFrame^ = true
         _stats.accum_seconds = 0
         _stats.frame_count = 0
+
         _stats.accum_frame_ms = 0
         _stats.accum_sim_ms = 0
         _stats.accum_render_ms = 0
+        _stats.accum_build_instances_ms = 0
+        _stats.accum_upload_ms = 0
+        _stats.accum_draw_ms = 0
     }
 
-    return dt, spawnThisFrame
+    return dt
 }

@@ -17,13 +17,25 @@ namespace sdl3platform {
     struct FrameStats {
         uint64_t freq;
         uint64_t last_counter;
+
         double accum_seconds;
-        double accumSpawnThreshhold;
         int frame_count;
+
         double fps;
-        double ms_per_frame;
-        double sim_time_ms;
-        double render_ms;
+        double avg_frame_ms;
+        double avg_sim_ms;
+        double avg_render_ms;
+
+        double build_instances_ms;
+        double upload_ms;
+        double draw_ms;
+
+        double accum_frame_ms;
+        double accum_sim_ms;
+        double accum_render_ms;
+        double accum_build_instances_ms;
+        double accum_upload_ms;
+        double accum_draw_ms;
     };
 
     void InitFrameStats(FrameStats* _stats);
