@@ -27,7 +27,7 @@ namespace application {
         _appState->renderer.camera.position = { 960, 540 };
         _appState->renderer.camera.zoom = 1.0f;
 
-        _appState->scene.SpawnBatch(10000, static_cast<float>(_appState->platform.width), 5.0f);
+        //_appState->scene.SpawnBatch(10000, static_cast<float>(_appState->platform.width), 5.0f);
 
         std::cout << "--- App Successfully Initialized\n";
     }
@@ -42,8 +42,8 @@ namespace application {
             const size_t entityCount = _app->scene.GetObjectCount();
             const float dt = sdl3platform::TickFrameStats(&_app->stats, entityCount, spawn);
 
-            if (spawn) { // Spawn em
-                for (int i = 0; i < 1000; i++) {
+            if (spawn && entityCount < 200000) { // Spawn em
+                for (int i = 0; i < 50000; i++) {
                     _app->scene.SpawnRandomSprite(static_cast<float>(_app->platform.width), 5.0f);
                 }
             }

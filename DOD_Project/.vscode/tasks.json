@@ -62,6 +62,7 @@
         "./src",
         "-collection:app=./src",
         "-out:./Build/Release/DOD_Project.exe",
+        "-no-bounds-check",
         "-o:speed"
       ],
       "options": { "cwd": "${workspaceFolder}" },
@@ -79,6 +80,7 @@
         "-collection:app=./src",
         "-out:./Build/Release/DOD_Project.exe",
         "-o:speed",
+        "-no-bounds-check",
         "--"
       ],
       "options": { "cwd": "${workspaceFolder}" },

@@ -33,12 +33,13 @@ Run :: proc(_app : ^AppState) {
     for _app.platform.running {
         platform.ExecuteSdlEvents(&_app.platform)
 
+        // Get data for spawning time
         spawn : bool = false
-        // Check if a entity should be spawned this loop,
         entityCount := len(_app.world.transforms.data)
+        // Check if the batches of entities should be spawned this loop.
         dt := platform.TickFrameStats(&_app.stats, entityCount, &spawn)
-        if spawn { // Spawn it
-            for i := 0; i < 1000; i += 1 {
+        if spawn && entityCount < 200000 { // Spawn it
+            for i := 0; i < 50000; i += 1 {
                 systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
             }
         }
