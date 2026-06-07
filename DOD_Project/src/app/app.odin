@@ -39,7 +39,7 @@ Run :: proc(_app : ^AppState) {
         // Check if the batches of entities should be spawned this loop.
         dt := platform.TickFrameStats(&_app.stats, entityCount, &spawn)
         if spawn && entityCount < 200000 { // Spawn it
-            for i := 0; i < 50000; i += 1 {
+            for i := 0; i < 20000; i += 1 {
                 systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
             }
         }

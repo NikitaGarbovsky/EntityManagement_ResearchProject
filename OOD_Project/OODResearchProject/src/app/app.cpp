@@ -43,7 +43,7 @@ namespace application {
             const float dt = sdl3platform::TickFrameStats(&_app->stats, entityCount, spawn);
 
             if (spawn && entityCount < 200000) { // Spawn em
-                for (int i = 0; i < 50000; i++) {
+                for (int i = 0; i < 20000; i++) {
                     _app->scene.SpawnRandomSprite(static_cast<float>(_app->platform.width), 5.0f);
                 }
             }

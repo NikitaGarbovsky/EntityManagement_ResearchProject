@@ -15,6 +15,7 @@ namespace sdl3platform {
     };
 
     struct FrameStats {
+        int test_duration_sec;
         uint64_t freq;
         uint64_t last_counter;
 

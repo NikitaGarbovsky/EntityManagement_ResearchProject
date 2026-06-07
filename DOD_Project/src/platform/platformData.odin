@@ -12,6 +12,7 @@ Platform :: struct {
 }
 
 Frame_Stats :: struct {
+    test_duration_sec : u64,
     freq : u64,
     last_counter : u64,
 
@@ -72,9 +73,10 @@ TickFrameStats :: proc(_stats: ^Frame_Stats, _count: int, _spawnThisFrame: ^bool
         _stats.build_instances_ms = _stats.accum_build_instances_ms / f64(_stats.frame_count)
         _stats.upload_ms = _stats.accum_upload_ms / f64(_stats.frame_count)
         _stats.draw_ms = _stats.accum_draw_ms / f64(_stats.frame_count)
-
+        _stats.test_duration_sec += 1
         fmt.printfln(
-            "FPS: %.1f  Total Frame MS: %.2f  Sim MS: %.3f, Render MS: %.3f, Build MS: %.3f, Upload MS: %.3f, Draw MS: %.3f",
+            "Duration: %v FPS: %.1f  Total Frame MS: %.2f  Sim MS: %.3f, Render MS: %.3f, Build MS: %.3f, Upload MS: %.3f, Draw MS: %.3f",
+            _stats.test_duration_sec,
             _stats.fps,
             _stats.avg_frame_ms,
             _stats.avg_sim_ms,

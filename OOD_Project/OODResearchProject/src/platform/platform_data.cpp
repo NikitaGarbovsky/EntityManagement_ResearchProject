@@ -29,6 +29,7 @@ namespace sdl3platform {
         _stats->accum_build_instances_ms = 0.0;
         _stats->accum_upload_ms = 0.0;
         _stats->accum_draw_ms = 0.0;
+        _stats->test_duration_sec = 0.0;
     }
 
     float TickFrameStats(FrameStats* _stats, int _count, bool& _spawnThisFrame) {
@@ -60,9 +61,10 @@ namespace sdl3platform {
             _stats->build_instances_ms = _stats->accum_build_instances_ms / static_cast<double>(_stats->frame_count);
             _stats->upload_ms = _stats->accum_upload_ms / static_cast<double>(_stats->frame_count);
             _stats->draw_ms = _stats->accum_draw_ms / static_cast<double>(_stats->frame_count);
-
+            _stats->test_duration_sec += 1;
             std::cout << std::fixed << std::setprecision(1)
-                << "FPS: " << _stats->fps
+                << "Duration: " << _stats->test_duration_sec
+                << ", FPS: " << _stats->fps
                 << "  Total Frame MS: " << std::setprecision(2) << _stats->avg_frame_ms
                 << "  Sim MS: " << std::setprecision(3) << _stats->avg_sim_ms
                 << ", Render MS: " << _stats->avg_render_ms
