@@ -40,7 +40,7 @@ namespace sdl3platform {
     };
 
     void InitFrameStats(FrameStats* _stats);
-    float TickFrameStats(FrameStats* _stats, int _count, bool& _spawnThisFrame);
+    float TickFrameStats(FrameStats* _stats, int _count);
 
     extern Platform gPlatform;
 }

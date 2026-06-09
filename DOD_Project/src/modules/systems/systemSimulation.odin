@@ -9,6 +9,7 @@ SimulateMovement :: proc(_world : ^ecs.Entity_World, _dt : f32, _viewport_w, _vi
         _world.transforms.data[i].pos.x += _world.velocities.data[i].linear.x * _dt
         _world.transforms.data[i].pos.y += _world.velocities.data[i].linear.y * _dt
 
+        // Delete components and recycle entity id if below screen
         if _world.transforms.data[i].pos.y > _viewport_h + 20 {
             e := _world.transforms.entities[i]
             ecs.DeleteEntity(_world, e)

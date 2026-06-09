@@ -27,8 +27,6 @@ namespace application {
         _appState->renderer.camera.position = { 960, 540 };
         _appState->renderer.camera.zoom = 1.0f;
 
-        //_appState->scene.SpawnBatch(10000, static_cast<float>(_appState->platform.width), 5.0f);
-
         std::cout << "--- App Successfully Initialized\n";
     }
     
@@ -38,15 +36,8 @@ namespace application {
             sdl3platform::ExecuteSdlEvents(&_app->platform);
 
             // Check the batch of GameObjects should be spawned this loop,
-            bool spawn = false;
             const size_t entityCount = _app->scene.GetObjectCount();
-            const float dt = sdl3platform::TickFrameStats(&_app->stats, entityCount, spawn);
-
-            if (spawn && entityCount < 200000) { // Spawn em
-                for (int i = 0; i < 20000; i++) {
-                    _app->scene.SpawnRandomSprite(static_cast<float>(_app->platform.width), 5.0f);
-                }
-            }
+            const float dt = sdl3platform::TickFrameStats(&_app->stats, entityCount);
 
             std::array<int, 2> viewportsize = { _app->platform.width, _app->platform.height };
 
@@ -54,6 +45,15 @@ namespace application {
             _app->scene.Update(dt, viewportsize[0], viewportsize[1], 5.0f);
             _app->stats.avg_sim_ms = (SDL_GetPerformanceCounter() - sim_start) * 1000.0 / (_app->stats.freq);
             
+            if (_app->scene.GetObjectCount() < 200000) {
+                size_t remaining = 200000 - _app->scene.GetObjectCount();
+                size_t spawnCount = std::min<std::size_t>(remaining, 20000);
+
+                for (size_t i = 0; i < spawnCount; ++i) {
+                    _app->scene.SpawnRandomSprite(static_cast<float>(_app->platform.width), 5.0f);
+                }
+            }
+
             double build_ms = 0.0;
             double upload_ms = 0.0;
             double draw_ms = 0.0;

@@ -9,7 +9,7 @@ Entity :: struct {
 // Holds references to entities and their associated components
 Entity_World :: struct {
     next_entity : u32,
-    free_entities : [dynamic]Entity,
+    free_entities : [dynamic]Entity, 
 
     transforms : Component_Store(components.Transform),
     sprites : Component_Store(components.Sprite),

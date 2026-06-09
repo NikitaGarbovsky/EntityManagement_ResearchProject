@@ -5,7 +5,6 @@
 
 namespace gameobject {
 
-    // The 3 base components of game objects.
     struct Transform {
         std::array<float, 2> position{ 0.0f, 0.0f };
         float rotation = 0.0f;
@@ -23,7 +22,6 @@ namespace gameobject {
     class GameObject {
     public:
         virtual ~GameObject() = default;
-
         virtual void Update(float _dt) = 0;
         virtual void BuildSpriteInstance(renderer::Sprite_Instance& _out) const = 0;
         virtual bool isOffscreen(float _viewport_h) const = 0;
@@ -33,7 +31,6 @@ namespace gameobject {
 
     protected:
         GameObject() = default;
-
         bool active = true;
     };
 
@@ -45,6 +42,9 @@ namespace gameobject {
         void Update(float _dt) override;
         void BuildSpriteInstance(renderer::Sprite_Instance& _out) const override;
         bool isOffscreen(float _viewport_h) const override;
+
+        // Used to reset sprite position
+        void Reset(float _viewport_w, float _velocitySpeed);
 
         void setTransform(const Transform& _transform) noexcept { transform_ = _transform; }
         void setVelocity(const Velocity& _velocity) noexcept { velocity_ = _velocity; }

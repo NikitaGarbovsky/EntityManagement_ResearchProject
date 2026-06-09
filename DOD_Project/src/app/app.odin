@@ -38,16 +38,20 @@ Run :: proc(_app : ^AppState) {
         entityCount := len(_app.world.transforms.data)
         // Check if the batches of entities should be spawned this loop.
         dt := platform.TickFrameStats(&_app.stats, entityCount, &spawn)
-        if spawn && entityCount < 200000 { // Spawn it
-            for i := 0; i < 20000; i += 1 {
-                systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
-            }
-        }
-
+        
         // Run and record performance of the movement simulation
         sim_start := sdl.GetPerformanceCounter()
         systems.SimulateMovement(&_app.world, dt, f32(_app.platform.width), f32(_app.platform.height), 5)
         _app.stats.avg_sim_ms = f64(sdl.GetPerformanceCounter() - sim_start) * 1000.0 / f64(_app.stats.freq)
+        
+        if len(_app.world.transforms.data) < 200000 { // Spawn it
+            remaining : int = 200000 - len(_app.world.transforms.data) 
+            spawnCount := math.min(remaining, 20000)
+
+            for i := 0; i < spawnCount; i += 1 {
+                systems.SpawnEntity(&_app.world, f32(_app.platform.width), 5)
+            }
+        }
 
         viewport_size := math.Vector2f32{f32(_app.platform.width), f32(_app.platform.height)}
 

@@ -32,7 +32,7 @@ namespace sdl3platform {
         _stats->test_duration_sec = 0.0;
     }
 
-    float TickFrameStats(FrameStats* _stats, int _count, bool& _spawnThisFrame) {
+    float TickFrameStats(FrameStats* _stats, int _count) {
         const uint64_t now = SDL_GetPerformanceCounter();
         const uint64_t delta_counts = now - _stats->last_counter;
         _stats->last_counter = now;
@@ -50,8 +50,6 @@ namespace sdl3platform {
         _stats->accum_build_instances_ms += _stats->build_instances_ms;
         _stats->accum_upload_ms += _stats->upload_ms;
         _stats->accum_draw_ms += _stats->draw_ms;
-
-        _spawnThisFrame = false;
 
         if (_stats->accum_seconds >= 1.0) {
             _stats->fps = static_cast<double>(_stats->frame_count) / _stats->accum_seconds;
@@ -74,7 +72,6 @@ namespace sdl3platform {
 
             std::cout << "EntityCount: " << _count << '\n';
 
-            _spawnThisFrame = true;
             _stats->accum_seconds = 0.0;
             _stats->frame_count = 0;
 
