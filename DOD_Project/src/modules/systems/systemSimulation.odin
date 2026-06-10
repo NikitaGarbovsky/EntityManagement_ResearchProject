@@ -4,13 +4,25 @@ import "../ecs"
 import "../components"
 import "core:math/rand"
 
-SimulateMovement :: proc(_world : ^ecs.Entity_World, _dt : f32, _viewport_w, _viewport_h : f32, _velocitySpeed : f32) {
+DAMAGE_PER_SECOND : f32 = 20.0
+
+SimulateMovement :: proc(_world : ^ecs.Entity_World, _dt : f32, _viewport_w, _viewport_h : f32, _velocitySpeed : f32, _deathCount : ^int) {
     for i := len(_world.transforms.data) - 1; i >= 0; i -= 1 {
         _world.transforms.data[i].pos.x += _world.velocities.data[i].linear.x * _dt
         _world.transforms.data[i].pos.y += _world.velocities.data[i].linear.y * _dt
 
+        // Damage all entities with health components enabled.
+        if _world.healths.data[i].enabled {
+            _world.healths.data[i].current -= DAMAGE_PER_SECOND * _dt
+
+            if _world.healths.data[i].current <= 0 {
+                _world.healths.data[i].enabled = false
+        }
+}
+
         // Delete components and recycle entity id if below screen
-        if _world.transforms.data[i].pos.y > _viewport_h + 20 {
+        if _world.transforms.data[i].pos.y > _viewport_h + 20 || _world.healths.data[i].current <= 0 {
+            _deathCount^ += 1
             e := _world.transforms.entities[i]
             ecs.DeleteEntity(_world, e)
             SpawnEntity(_world, _viewport_w, _velocitySpeed)
@@ -50,4 +62,17 @@ SpawnEntity :: proc(_world : ^ecs.Entity_World, _viewport_w : f32, _velocitySpee
             size = {5, 5},
             color = {rand.float32(), rand.float32(), rand.float32(), 1},
         })
+
+    preEnabled : bool = false
+    random := rand.float32_range(0, 1)
+    if random > 0.5 {
+        preEnabled = true    
+    }
+    
+    ecs.AddComponentToEntityWorld(_world, &_world.healths, e, components.Health{ 
+        enabled = preEnabled, 
+        max = 100, 
+        current = 100, 
+    })
+    
 }

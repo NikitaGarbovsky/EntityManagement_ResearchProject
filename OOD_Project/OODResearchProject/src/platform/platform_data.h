@@ -37,6 +37,7 @@ namespace sdl3platform {
         double accum_build_instances_ms;
         double accum_upload_ms;
         double accum_draw_ms;
+        int entitiesKilledLastFrame;
     };
 
     void InitFrameStats(FrameStats* _stats);

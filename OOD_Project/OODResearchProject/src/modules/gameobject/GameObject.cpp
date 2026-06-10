@@ -33,6 +33,15 @@ namespace gameobject {
             RandRange(0.0f, 1.0f),
             1.0f
         };
+
+        if (RandRange(0, 1) > 0.5) {
+            health_ = Health{
+                .enabled = true,
+                .current = 100.0f,
+                .max = 100.0f
+            };
+        }
+        
     }
 
     void SpriteObject::Update(float _dt) {
@@ -54,4 +63,34 @@ namespace gameobject {
         return transform_.position[1] > _viewport_h + 20.0f;
     }
 
+    bool SpriteObject::HasHealth() const {
+        return health_.enabled;
+    }
+
+    void SpriteObject::AddHealth(float maxHealth = 100.0f) {
+        health_.enabled = true;
+        health_.current = maxHealth;
+        health_.max = maxHealth;
+    }
+
+    void SpriteObject::RemoveHealth() {
+        health_.enabled = false;
+    }
+
+    void SpriteObject::Damage(float _amount) {
+        if (!health_.enabled) {
+            return;
+        }
+
+        health_.current -= _amount;
+
+        if (health_.current < 0.0f) {
+            health_.current = 0.0f;
+        }
+    }
+
+    bool SpriteObject::IsDead() const {
+        return health_.enabled &&
+            health_.current <= 0.0f;
+    }
 }

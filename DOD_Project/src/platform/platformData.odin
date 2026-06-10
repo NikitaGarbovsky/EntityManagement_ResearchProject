@@ -36,6 +36,7 @@ Frame_Stats :: struct {
     accum_build_instances_ms : f64,
     accum_upload_ms : f64,
     accum_draw_ms : f64,
+    entityDeathsLastFrame : int,
 }
 
 InitFrameStats :: proc(stats : ^Frame_Stats) {
@@ -87,7 +88,7 @@ TickFrameStats :: proc(_stats: ^Frame_Stats, _count: int, _spawnThisFrame: ^bool
         )
 
         fmt.printfln("EntityCount: %d", _count)
-
+        fmt.printfln("Deaths Last Frame: %d", _stats.entityDeathsLastFrame)
         _spawnThisFrame^ = true
         _stats.accum_seconds = 0
         _stats.frame_count = 0
@@ -98,7 +99,9 @@ TickFrameStats :: proc(_stats: ^Frame_Stats, _count: int, _spawnThisFrame: ^bool
         _stats.accum_build_instances_ms = 0
         _stats.accum_upload_ms = 0
         _stats.accum_draw_ms = 0
+        _stats.entityDeathsLastFrame = 0
     }
 
+    
     return dt
 }

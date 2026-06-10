@@ -19,6 +19,12 @@ namespace gameobject {
         std::array<float, 4> color{ 1.0f, 1.0f, 1.0f, 1.0f };
     };
 
+    struct Health {
+        bool enabled = false;
+        float current = 100.0f;
+        float max = 100.0f;
+    };
+
     class GameObject {
     public:
         virtual ~GameObject() = default;
@@ -49,15 +55,22 @@ namespace gameobject {
         void setTransform(const Transform& _transform) noexcept { transform_ = _transform; }
         void setVelocity(const Velocity& _velocity) noexcept { velocity_ = _velocity; }
         void setSprite(const Sprite& _sprite) noexcept { sprite_ = _sprite; }
+        void setHealth(const Health& _health) noexcept { health_ = _health; }
 
         const Transform& GetTransform() const noexcept { return transform_; }
         const Velocity& GetVelocity() const noexcept { return velocity_; }
         const Sprite& GetSprite() const noexcept { return sprite_; }
 
+        bool HasHealth() const;
+        void AddHealth(float _maxHealth);
+        void RemoveHealth();
+        void Damage(float _amount);
+        bool IsDead() const;
     private:
         Transform transform_{};
         Velocity velocity_{};
         Sprite sprite_{};
+        Health health_{};
     };
 
 }

@@ -30,6 +30,7 @@ namespace sdl3platform {
         _stats->accum_upload_ms = 0.0;
         _stats->accum_draw_ms = 0.0;
         _stats->test_duration_sec = 0.0;
+        _stats->entitiesKilledLastFrame = 0;
     }
 
     float TickFrameStats(FrameStats* _stats, int _count) {
@@ -71,7 +72,8 @@ namespace sdl3platform {
                 << ", Draw MS: " << _stats->draw_ms << '\n';
 
             std::cout << "EntityCount: " << _count << '\n';
-
+            std::cout << "Entities Killed Last Frame: " <<
+                _stats->entitiesKilledLastFrame << '\n';
             _stats->accum_seconds = 0.0;
             _stats->frame_count = 0;
 
@@ -81,6 +83,7 @@ namespace sdl3platform {
             _stats->accum_build_instances_ms = 0.0;
             _stats->accum_upload_ms = 0.0;
             _stats->accum_draw_ms = 0.0;
+            _stats->entitiesKilledLastFrame = 0;
         }
 
         return dt;

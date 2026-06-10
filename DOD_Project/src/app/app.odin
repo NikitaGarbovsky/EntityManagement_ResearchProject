@@ -41,7 +41,7 @@ Run :: proc(_app : ^AppState) {
         
         // Run and record performance of the movement simulation
         sim_start := sdl.GetPerformanceCounter()
-        systems.SimulateMovement(&_app.world, dt, f32(_app.platform.width), f32(_app.platform.height), 5)
+        systems.SimulateMovement(&_app.world, dt, f32(_app.platform.width), f32(_app.platform.height), 5, &_app.stats.entityDeathsLastFrame)
         _app.stats.avg_sim_ms = f64(sdl.GetPerformanceCounter() - sim_start) * 1000.0 / f64(_app.stats.freq)
         
         if len(_app.world.transforms.data) < 200000 { // Spawn it

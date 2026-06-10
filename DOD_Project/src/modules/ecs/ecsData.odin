@@ -14,6 +14,7 @@ Entity_World :: struct {
     transforms : Component_Store(components.Transform),
     sprites : Component_Store(components.Sprite),
     velocities : Component_Store(components.Velocity),
+    healths : Component_Store(components.Health),
 }
 
 // Holds references to the components and their associated entities for the ECS system.

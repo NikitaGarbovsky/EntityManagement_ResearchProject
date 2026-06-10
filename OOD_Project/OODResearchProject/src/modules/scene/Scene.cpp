@@ -66,17 +66,23 @@ namespace scene {
         ++activeCount_;
     }
 
-    void Scene::Update(float _dt, float _viewport_w, float _viewport_h, float _velocitySpeed) {
+    void Scene::Update(float _dt, float _viewport_w, float _viewport_h, float _velocitySpeed, int &_deathCount) {
         for (std::size_t i = 0; i < activeIndices.size(); ++i) {
             const std::size_t idx = activeIndices[i];
             auto& obj = pool[idx];
 
             obj->Update(_dt);
 
-            // If we're off screen,
-            if (obj->isOffscreen(_viewport_h)) {
+            // Damage all entities with health components enabled.
+            if (obj->HasHealth()) {
+                float amount = DAMAGE_PER_SECOND * _dt;
+                obj->Damage(amount);
+            }
 
-                // die, give slot to free list,
+            // If we're off screen, or we died
+            if (obj->isOffscreen(_viewport_h) || obj->IsDead()) {
+                _deathCount++;
+                // release resources, give slot to free list,
                 ReleaseSlot(idx);
 
                 // remove from active list

@@ -42,7 +42,7 @@ namespace application {
             std::array<int, 2> viewportsize = { _app->platform.width, _app->platform.height };
 
             size_t sim_start = SDL_GetPerformanceCounter();
-            _app->scene.Update(dt, viewportsize[0], viewportsize[1], 5.0f);
+            _app->scene.Update(dt, viewportsize[0], viewportsize[1], 5.0f, _app->stats.entitiesKilledLastFrame);
             _app->stats.avg_sim_ms = (SDL_GetPerformanceCounter() - sim_start) * 1000.0 / (_app->stats.freq);
             
             if (_app->scene.GetObjectCount() < 200000) {

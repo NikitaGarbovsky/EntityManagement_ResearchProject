@@ -16,3 +16,9 @@ Sprite :: struct {
     size : math.Vector2f32,
     color : [4]f32,
 }
+
+Health :: struct {
+    enabled : bool,
+    current : f32,
+    max : f32,
+}
