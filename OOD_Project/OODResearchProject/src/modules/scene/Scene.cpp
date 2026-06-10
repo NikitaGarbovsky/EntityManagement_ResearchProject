@@ -1,6 +1,7 @@
 #include "Scene.h"
 #include <algorithm>
 #include <random>
+#include <iostream>
 
 namespace scene {
     // Helper for random number gen.
@@ -67,16 +68,42 @@ namespace scene {
     }
 
     void Scene::Update(float _dt, float _viewport_w, float _viewport_h, float _velocitySpeed, int &_deathCount) {
+        if (gustActive_)
+        {
+            gustTimer_ -= _dt;
+
+            if (gustTimer_ <= 0.0f)
+            {
+                gustActive_ = false;
+                gustTimer_ = 6.0f;
+
+                std::cout << "gust ended\n";
+            }
+        }
+        else
+        {
+            gustTimer_ -= _dt;
+
+            if (gustTimer_ <= 0.0f)
+            {
+                gustActive_ = true;
+                gustTimer_ = 2.0f;
+
+                std::cout << "gust activated\n";
+            }
+        }
         for (std::size_t i = 0; i < activeIndices.size(); ++i) {
             const std::size_t idx = activeIndices[i];
             auto& obj = pool[idx];
 
-            obj->Update(_dt);
+            obj->Update(_dt, gustActive_, GUST_FORCE);
 
-            // Damage all entities with health components enabled.
-            if (obj->HasHealth()) {
-                float amount = DAMAGE_PER_SECOND * _dt;
-                obj->Damage(amount);
+            if (gustActive_)
+            {
+                obj->ApplyGustDamage(
+                    GUST_FORCE,
+                    DAMAGE_SCALE,
+                    _dt);
             }
 
             // If we're off screen, or we died

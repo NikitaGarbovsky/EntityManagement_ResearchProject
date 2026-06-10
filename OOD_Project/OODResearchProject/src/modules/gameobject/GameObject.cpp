@@ -34,23 +34,30 @@ namespace gameobject {
             1.0f
         };
 
-        if (RandRange(0, 1) > 0.5) {
-            health_ = Health{
+        health_ = Health{
                 .enabled = true,
                 .current = 100.0f,
                 .max = 100.0f
-            };
-        }
+        };
         
     }
 
-    void SpriteObject::Update(float _dt) {
-        if (!active) {
+    void SpriteObject::Update(float _dt, bool _gustActive, float _GUST_FORCE)
+    {
+        if (!active)
+        {
             return;
         }
 
+        float effectiveVelocityY = velocity_.linear[1];
+
+        if (_gustActive)
+        {
+            effectiveVelocityY -= _GUST_FORCE;
+        }
+
         transform_.position[0] += velocity_.linear[0] * _dt;
-        transform_.position[1] += velocity_.linear[1] * _dt;
+        transform_.position[1] += effectiveVelocityY * _dt;
     }
 
     void SpriteObject::BuildSpriteInstance(renderer::Sprite_Instance& _out) const {
@@ -92,5 +99,27 @@ namespace gameobject {
     bool SpriteObject::IsDead() const {
         return health_.enabled &&
             health_.current <= 0.0f;
+    }
+    void SpriteObject::ApplyGustDamage(
+        float _gustForce,
+        float _damageScale,
+        float _dt)
+    {
+        if (!HasHealth())
+        {
+            return;
+        }
+
+        float upwardVelocity =
+            std::max(
+                0.0f,
+                _gustForce - velocity_.linear[1]);
+
+        float damage =
+            upwardVelocity *
+            _damageScale *
+            _dt;
+
+        Damage(damage);
     }
 }

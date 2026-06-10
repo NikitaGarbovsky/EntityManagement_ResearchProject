@@ -22,13 +22,8 @@ namespace scene {
         void BuildRenderInstances(std::vector<renderer::Sprite_Instance>& _out) const;
 
         std::size_t GetObjectCount() const noexcept { return activeCount_; }
-        std::vector<std::size_t>& GetActiveIndices() {
-            return activeIndices;
-        }
 
-        gameobject::SpriteObject* GetObject(std::size_t idx) {
-            return pool[idx].get();
-        }
+        bool IsGustActive() const { return gustActive_; }
     private:
         static constexpr std::size_t INVALID_INDEX = static_cast<std::size_t>(-1);
 
@@ -42,7 +37,11 @@ namespace scene {
         std::vector<std::size_t> activeIndices;
         std::size_t activeCount_{ 0 };
 
-        const float DAMAGE_PER_SECOND = 20;
+        // Gust properties
+        const float DAMAGE_SCALE = 6.0f;
+        float gustTimer_ = 6.0f;
+        bool gustActive_ = false;
+        const float GUST_FORCE = 150.0f;
     };
 
 }

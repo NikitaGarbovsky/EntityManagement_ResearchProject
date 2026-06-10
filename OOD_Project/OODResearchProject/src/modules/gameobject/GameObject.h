@@ -28,13 +28,13 @@ namespace gameobject {
     class GameObject {
     public:
         virtual ~GameObject() = default;
-        virtual void Update(float _dt) = 0;
+        virtual void Update(float _dt, bool _gustActive, float _GUST_FORCE) = 0;
         virtual void BuildSpriteInstance(renderer::Sprite_Instance& _out) const = 0;
         virtual bool isOffscreen(float _viewport_h) const = 0;
 
         bool isActive() const noexcept { return active; }
         void setActive(bool _active) noexcept { active = _active; }
-
+        
     protected:
         GameObject() = default;
         bool active = true;
@@ -45,7 +45,7 @@ namespace gameobject {
         SpriteObject() = default;
         SpriteObject(Transform _transform, Velocity _velocity, Sprite _sprite) noexcept;
 
-        void Update(float _dt) override;
+        void Update(float _dt, bool _gustActive, float _GUST_FORCE) override;
         void BuildSpriteInstance(renderer::Sprite_Instance& _out) const override;
         bool isOffscreen(float _viewport_h) const override;
 
@@ -66,6 +66,7 @@ namespace gameobject {
         void RemoveHealth();
         void Damage(float _amount);
         bool IsDead() const;
+        void ApplyGustDamage(float _gustForce, float _damageScale, float _dt);
     private:
         Transform transform_{};
         Velocity velocity_{};
